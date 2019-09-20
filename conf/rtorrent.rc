@@ -1,4 +1,3 @@
-# This is the rtorrent configuration file installed by rtinst script - https://github.com/arakasi72/rtinst
 # This file is installed to ~/.rtorrent.rc
 # Enable/modify the options as needed, uncomment the options you wish to enable.
 # This configuration will work with most systems, but optimal settings are dependant on specific server setup
@@ -35,16 +34,18 @@ throttle.min_peers.seed.set = -1
 throttle.max_peers.seed.set = -1
 
 ### Networking
-network.port_range.set = 51001-51250
+network.port_range.set = 6881-6889
 network.port_random.set = yes
-dht.mode.set = disable
-protocol.pex.set = no
-trackers.use_udp.set = yes
+dht.mode.set = auto
+protocol.pex.set = yes
+trackers.use_udp.set = no
 
 # network.scgi.open_port = localhost:5000
 network.scgi.open_port = 127.0.0.1:5000
 network.http.ssl_verify_peer.set = 0
 protocol.encryption.set = allow_incoming,enable_retry,prefer_plaintext
+encryption = allow_incoming, try_outgoing
+
 
 network.max_open_files.set = 4096
 network.max_open_sockets.set = 1536
