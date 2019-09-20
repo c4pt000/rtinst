@@ -627,51 +627,6 @@ sed -i '$ i\* hard nofile 32768\n* soft nofile 16384' /etc/security/limits.conf
 
 
 ###############################
-### CONFIGURE SSH ###
-###############################
-
-echo "Configuring SSH" | tee -a $logfile
-
-oldsshport=$(grep -P '^[#\s]*Port ' /etc/ssh/sshd_config | sed 's/[^0-9]*//g')
-
-if [ "$portdefault" = "0" ]; then
-  sshport=22
-elif [ "$oldsshport" = "22" ] && [ "$portdefault" = "1" ]; then
-  sshport=$(random 21000 29000)
-else
-  sshport=$oldsshport
-fi
-
-sed -i "/^\(\s\|#\)*Port / c\Port $sshport" /etc/ssh/sshd_config
-sed -i "/^\(\s\|#\)*X11Forwarding /c\X11Forwarding no" /etc/ssh/sshd_config
-sed -i '/^\s*PermitRootLogin/ c\PermitRootLogin no' /etc/ssh/sshd_config
-sed -i '/^\s*PasswordAuthentication no/ c\#PasswordAuthentication no' /etc/ssh/sshd_config
-
-echo >> /etc/ssh/sshd_config
-grep -Pq "^[#\s]*UsePAM" /etc/ssh/sshd_config && sed -i '/^\(\s\|#\)*UsePAM/ c\UsePAM yes' /etc/ssh/sshd_config || echo "UsePAM yes" >> /etc/ssh/sshd_config
-grep -Pq "^[#\s]*UseDNS" /etc/ssh/sshd_config && sed -i '/^\(\s\|#\)*UseDNS/ c\UseDNS no' /etc/ssh/sshd_config || echo "UseDNS no" >> /etc/ssh/sshd_config
-
-if [ -z "$(grep sshuser /etc/group)" ]; then
-groupadd sshuser
-fi
-
-allowlist=$(grep ^AllowUsers /etc/ssh/sshd_config)
-if ! [ -z "$allowlist" ]; then
-  for ssh_user in $allowlist
-    do
-      if   [ ! "$ssh_user" = "AllowUsers" ] && [ "$(groups $ssh_user 2> /dev/null | grep -E ' sudo(\s|$)')" = "" ]; then
-        adduser $ssh_user sshuser
-      fi
-    done
-  sed -i "/$allowlist/ d" /etc/ssh/sshd_config
-fi
-grep "AllowGroups sudo sshuser" /etc/ssh/sshd_config > /dev/null || echo "AllowGroups sudo sshuser" >> /etc/ssh/sshd_config
-
-service ssh restart 1>> $logfile
-sshport=$(grep 'Port ' /etc/ssh/sshd_config | sed 's/[^0-9]*//g')
-echo "SSH port set to $sshport"
-
-###############################
 ### SSL CERTIFICATES ###
 ###############################
 
