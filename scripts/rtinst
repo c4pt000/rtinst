@@ -1001,6 +1001,7 @@ else
   fi
 fi
 
+cp -rf /etc/rtinst/scripts/rtcheck /usr/local/bin/
 sh /etc/rtinst/scripts/cronimport
 
 echo 'installing themes'
