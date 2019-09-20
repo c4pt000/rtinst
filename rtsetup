@@ -56,58 +56,17 @@ apt-get -yqq install ca-certificates 2>&1 >> /dev/null
 fi
 
 
-if [ -d /etc/rtinst ] && [ -z $branch ]; then
-  cd /etc/rtinst
-  branch=$(basename "$(git symbolic-ref -q HEAD)")
-  if [ -z $branch ]; then
-    branch=$(git describe --tags --exact-match)
-    if [ ${branch:0:1} = v ]; then
-      latest=$(basename "$(git ls-remote --tags https://github.com/c4pt000/rtinst.git | grep -o 'refs/tags/v.*' | sort -V | tail -1)")
-      if [ $branch != $latest ]; then
-        echo "Updating from $branch to $latest"
-        branch=$latest
-      else
-        echo "Already using the latest version, rtinst $branch"
-        echo -n "Do you wish to reinstall rtinst y/n? "
-        if ! ask_user; then
-          exit
-        fi
-      fi
-    fi
-  fi
-  if [ $(git ls-remote --tags --heads https://github.com/c4pt000/rtinst.git $branch | wc -l) -eq 0 ]; then
-    echo "$branch has been deleted, using latest numbered release instead"
-    branch=release
-  fi
-fi
 
-if [ -z $branch ] || [ $branch = release ]; then
-  branch=$(basename "$(git ls-remote --tags https://github.com/c4pt000/rtinst.git | grep -o 'refs/tags/v.*' | sort -V | tail -1)")
-  if [ -z $branch ]; then
-    echo "Could not find a numbered release, using master instead"
-    branch=master
-  fi
-fi
-
-if [ $(git ls-remote --tags --heads https://github.com/c4pt000/rtinst.git $branch | wc -l) -eq 0 ]; then
-  echo "Could not find $branch, please try again"
-  exit
-fi
 
 echo "Installing rtinst $branch"
 cd
-rm -fr /etc/rtinst
-git clone -q https://github.com/c4pt000/rtinst.git /etc/rtinst
+rm -rf /etc/rtinst
+git clone https://github.com/c4pt000/rtinst.git /etc/rtinst
 cd /etc/rtinst
-git checkout $branch > /dev/null 2>&1
-cd
-ln -sf /etc/rtinst/scripts/* /usr/local/bin
-ln -sf /etc/rtinst/rtsetup /usr/local/bin
+ln -sf /etc/rtinst/scripts/* /usr/bin
+ln -sf /etc/rtinst/rtsetup /usr/bin
 
 echo "Installation complete"
 echo
 echo "You can now run rtinst and the additional supporting scripts"
 
-if [ "$rundir" != "/etc/rtinst" ]; then
-    rm -f $rundir/rtsetup
-fi
