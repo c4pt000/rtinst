@@ -18,12 +18,10 @@ passfile='/etc/nginx/.htpasswd'
 scgi_port_start=5000
 rpc_start=2
 rtport_start=51001
-sshport=$(grep 'Port ' /etc/ssh/sshd_config | sed 's/[^0-9]*//g')
 ftpport=$(grep 'listen_port=' /etc/vsftpd.conf | sed 's/[^0-9]*//g')
 cronline1="@reboot sleep 10; /usr/local/bin/rtcheck irssi rtorrent"
 cronline2="*/10 * * * * /usr/local/bin/rtcheck irssi rtorrent"
 serverip=$(ip route get 8.8.8.8 | awk 'NR==1 {print $7}')
-check_ssh=1
 rtdstatus=$(rtdload)
 
 #get user list
@@ -180,14 +178,12 @@ if [ "$(id -u)" != "0" ]; then
 fi
 
 # get options
-OPTS=$(getopt -n "$0" -o snu:p:w: --long "ssh-access,no-ssh,user:,password:,webpass:" -- "$@")
+OPTS=$(getopt -n "$0" -o snu:p:w: --long "user:,password:,webpass:" -- "$@")
 
 eval set -- "$OPTS"
 
 while true; do
   case "$1" in
-    -s | --ssh-access ) check_ssh=0; sshaccess=0; shift;;
-    -n | --no-ssh ) check_ssh=0; sshaccess=1; shift;;
     -u | --user ) user="$2"; shift; shift;;
     -p | --password ) unixpass="$2"; shift; shift;;
     -w | --webpass ) webpass="$2"; shift; shift;;
@@ -263,23 +259,10 @@ if [ -d "/var/www/rutorrent/conf/users/$user" ]; then
   echo "Will reset $user config, filters and torrents will not be deleted"
 fi
 
-if groups $user | grep -q -E ' sshuser(\s|$)' || groups $user | grep -q -E ' sudo(\s|$)'; then
-  echo "ssh already granted"
-  check_ssh=0
-fi
 
- while [ $check_ssh = 1 ]
-   do
-     read -p "Grant $user ssh access? " answer
-     case $answer in [Yy]* ) sshaccess=0  check_ssh=0  ;;
-                     [Nn]* ) sshaccess=1  check_ssh=0  ;;
-                         * ) echo "Enter y or n";;
-      esac
-   done
 
-if [ "$sshaccess" = "0" ]; then
-      adduser $user sshuser
-fi
+
+
 
 if [ "$user" = "$SUDO_USER" ]; then
   echo "Will reset $user config, autodl filters and torrents will not be deleted"
@@ -412,10 +395,7 @@ echo
 ###############################
 
 echo > $home/rtinst.info
-if groups $user | grep -q -E ' sshuser(\s|$)' || groups $user | grep -q -E ' sudo(\s|$)'; then
-echo "$user has SSH access on port $sshport" | tee -a $home/rtinst.info
-echo
-fi
+
 echo "ftp client should be set to explicit ftp over tls using port $ftpport" | tee -a $home/rtinst.info
 echo
 if [ "$rtdstatus" = "enabled" ]; then
