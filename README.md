@@ -1,5 +1,7 @@
 ## rtinst
 
+* original code exists here https://github.com/arakasi72/rtinst
+
 ### Note: Now installs Lets Encrypt SSL certificates
 
 #### 30 Second Guide
