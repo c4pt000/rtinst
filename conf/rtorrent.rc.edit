@@ -3,7 +3,7 @@
 # This configuration will work with most systems, but optimal settings are dependant on specific server setup
 
 ### Set Directories
-method.insert = cfg.basedir,     private|const|string, (cat,"<user home>/rtorrent/")
+method.insert = cfg.basedir,     private|const|string, (cat,"/home/seedbox/rtorrent/")
 method.insert = cfg.watch,       private|const|string, (cat,(cfg.basedir),"watch/")
 
 #method.insert = cfg.logs,       private|const|string, (cat,(cfg.basedir),"log/")
@@ -33,12 +33,25 @@ throttle.max_peers.normal.set = 150
 throttle.min_peers.seed.set = -1
 throttle.max_peers.seed.set = -1
 
-### Networking
-network.port_range.set = 6881-6889
-network.port_random.set = yes
+
+## Listening port for incoming peer traffic (fixed; you can also randomize it)
+network.port_range.set = 49164-49164
+network.port_random.set = no
+
+## Tracker-less torrent and UDP tracker support
+protocol.pex.set = 1
+trackers.use_udp.set = 1
 dht.mode.set = auto
-protocol.pex.set = yes
-trackers.use_udp.set = no
+dht.port.set = 6881
+
+# Adding public DHT servers for easy bootstrapping
+schedule2 = dht_node_1, 5, 0, "dht.add_node=router.utorrent.com:6881"
+schedule2 = dht_node_2, 5, 0, "dht.add_node=dht.transmissionbt.com:6881"
+schedule2 = dht_node_3, 5, 0, "dht.add_node=router.bitcomet.com:6881"
+schedule2 = dht_node_4, 5, 0, "dht.add_node=dht.aelitis.com:6881"
+
+
+
 
 # network.scgi.open_port = localhost:5000
 network.scgi.open_port = 127.0.0.1:5000
@@ -68,6 +81,6 @@ pieces.memory.max.set = 3500M
 
 
 ### The following line initialises rutorrent plugins without needing to open the web interface
-execute = {sh,-c,/usr/bin/php /var/www/rutorrent/php/initplugins.php <user name> &}
+execute = {sh,-c,/usr/bin/php /var/www/rutorrent/php/initplugins.php seedbox &}
 
 #EOF
