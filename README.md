@@ -2,7 +2,9 @@
 
 * original code exists here https://github.com/arakasi72/rtinst
 
-### Note: Now installs Lets Encrypt SSL certificates
+### Note: Now installs SSL using Lets Encrypt SSL certbot
+
+### See https://github.com/c4pt000/ruTorrent-Themed-install for deeper explaination of this modified script
 
 #### 30 Second Guide
 
